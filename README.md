@@ -26,3 +26,9 @@ Run:
 ```bash
 $ firebase deploy
 ```
+
+Deploy specific functions:
+
+```bash
+$ firebase deploy --only functions:myFunction,functions:anotherFunction
+```
