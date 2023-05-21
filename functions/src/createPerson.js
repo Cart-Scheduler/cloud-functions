@@ -30,6 +30,7 @@ module.exports = async (user) => {
   // create a new user doc using uid
   await db.collection('users').doc(user.uid).set({
     personId: personRes.id,
+    modified: FieldValue.serverTimestamp(),
     created: FieldValue.serverTimestamp(),
   });
   logger.info('User doc created', user.uid);
