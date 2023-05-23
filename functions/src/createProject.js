@@ -7,12 +7,51 @@ const { readDoc, docExists } = require('./firestore');
 const db = getFirestore();
 
 /**
- * Returns true if given project ID is valid.
- * @param {string} projectId
- * @return {boolean}
+ * Throws an error if given project ID is invalid.
+ * Requirements for document ID:
+ * https://firebase.google.com/docs/firestore/quotas#collections_documents_and_fields
+ * @param {string} id - project ID
+ * @return {undefined}
  */
-function projectIdIsValid(projectId) {
-  return (projectId === projectId);
+function validateProjectId(id) {
+  const minLength = 6;
+  const maxLength = 32;
+
+  if (typeof id !== 'string') {
+    throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Project ID must be a string.',
+    );
+  }
+
+  if (id.length < minLength) {
+    throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Min length for project ID is ' + minLength,
+    );
+  }
+
+  if (id.length > maxLength) {
+    throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Max length for project ID is ' + maxLength,
+    );
+  }
+
+  if (id === '.' || id === '..' || /__.*__/.test(id)) {
+    throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Invalid project ID.',
+    );
+  }
+
+  const validPattern = /^[a-zA-Z0-9_-]+$/;
+  if (!validPattern.test(id)) {
+    throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Project ID must contain only letters, digits, "-" and "_".',
+    );
+  }
 }
 
 module.exports = async (request, context) => {
@@ -29,13 +68,8 @@ module.exports = async (request, context) => {
     );
   }
 
-  const projectId = request.data.projectId;
-  if (!projectIdIsValid(projectId)) {
-    throw new functions.https.HttpsError(
-        'invalid-argument',
-        'Invalid argument: projectId',
-    );
-  }
+  const projectId = request.data.id;
+  validateProjectId(projectId);
 
   const exists = await docExists('projects', projectId);
   if (exists) {
