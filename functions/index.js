@@ -1,45 +1,48 @@
 /**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * Currently both 1st and 2nd gen cloud functions are used.
+ * Authentication triggers do not yet support 2nd gen cloud functions.
  */
 
-// const { onRequest } = require('firebase-functions/v2/https');
+// Imports for 1st gen cloud functions
 const { initializeApp } = require('firebase-admin/app');
 const functions = require('firebase-functions');
+
+// Imports for 2nd gen cloud functions
+const { setGlobalOptions } = require('firebase-functions/v2');
+const { onCall } = require('firebase-functions/v2/https');
 
 initializeApp();
 
 const createPerson = require('./src/createPerson');
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const createProject = require('./src/createProject');
 
 /**
  * Returns region where the function is deployed.
- * Can be overridden by env var CART_SCHEDULER_REGION.
+ * For example when Firestore location is eur3,
+ * europe-west1 is good region for functions.
  * https://firebase.google.com/docs/functions/locations
+ *
+ * Value is overridden by env var CART_SCHEDULER_REGION.
  * @return {string} - cloud function region
  */
 function getRegion() {
   if (process.env.CART_SCHEDULER_REGION) {
     return process.env.CART_SCHEDULER_REGION;
   }
-  // when database location is 'eur3', 'europe-west1' is good for functions
+  // default location
   return 'europe-west1';
 }
 
-// Triggered when a new authenticated user is created
+// Set region for all 2nd gen cloud functions
+setGlobalOptions({ region: getRegion() });
+
+// Triggered when a new authenticated user is created.
+// Authentication triggers do not yet support 2nd gen functions.
 exports.createPerson = functions
     .region(getRegion())
     .auth
     .user()
     .onCreate(createPerson);
+
+// Callable function for creating new projects
+exports.createProject = onCall(createProject);
