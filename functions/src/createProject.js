@@ -54,7 +54,7 @@ function validateProjectId(id) {
   }
 }
 
-module.exports = async (request, context) => {
+module.exports = async (request) => {
   logger.debug(
       'Create project',
       request.data,
