@@ -45,11 +45,11 @@ function validateProjectId(id) {
     );
   }
 
-  const validPattern = /^[a-zA-Z0-9_-]+$/;
+  const validPattern = /^[a-z0-9_-]+$/;
   if (!validPattern.test(id)) {
     throw new functions.https.HttpsError(
         'invalid-argument',
-        'Project ID must contain only letters, digits, "-" and "_".',
+        'Project ID must contain only these characters: a-z, 0-9, "-", "_".',
     );
   }
 }
