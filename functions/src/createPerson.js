@@ -17,6 +17,7 @@ module.exports = async (user) => {
 
   // create a new person doc with a random id
   const data = {
+    new: true,
     modified: FieldValue.serverTimestamp(),
     created: FieldValue.serverTimestamp(),
   };
