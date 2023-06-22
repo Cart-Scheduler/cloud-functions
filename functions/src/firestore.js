@@ -1,7 +1,25 @@
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const logger = require('firebase-functions/logger');
 
+// Firestore has a limit how many comparison values can be used with 'IN'
+// operation.
+const MAX_IN_COMPARISON_VALUES = 30;
+
 const db = getFirestore();
+
+// Chops given array into chunks where each chunk has maximum
+// chunkLength entries. Returns array of arrays.
+const chopArray = (arr, chunkLength) => {
+  const len = arr.length;
+  if (!len) {
+    return [[]];
+  }
+  const result = [];
+  for (let i = 0; i < len; i += chunkLength) {
+    result.push(arr.slice(i, i + chunkLength));
+  }
+  return result;
+};
 
 /**
  * Reads a Firestore document.
@@ -86,23 +104,30 @@ exports.getAdmins = getAdmins;
  * @return {array} FCM tokens
  */
 exports.fetchFcmTokens = async (personIds) => {
+  // 'IN' operator has a limit how many values can be used, so chop them
   const userIds = [];
-  const userSS = await db
-      .collection('users')
-      .where('personId', 'in', personIds)
-      .get();
-  userSS.forEach((doc) => {
-    userIds.push(doc.id);
-  });
+  const choppedPersonIds = chopArray(personIds, MAX_IN_COMPARISON_VALUES);
+  for (let i = 0; i < choppedPersonIds.length; i++) {
+    const userSS = await db
+        .collection('users')
+        .where('personId', 'in', choppedPersonIds[i])
+        .get();
+    userSS.forEach((doc) => {
+      userIds.push(doc.id);
+    });
+  }
 
   const tokens = [];
-  const tokenSS = await db
-      .collection('fcmTokens')
-      .where('uid', 'in', userIds)
-      .get();
-  tokenSS.forEach((doc) => {
-    tokens.push(doc.data().token);
-  });
+  const choppedUids = chopArray(userIds, MAX_IN_COMPARISON_VALUES);
+  for (let i = 0; i < choppedUids.length; i++) {
+    const tokenSS = await db
+        .collection('fcmTokens')
+        .where('uid', 'in', choppedUids[i])
+        .get();
+    tokenSS.forEach((doc) => {
+      tokens.push(doc.data().token);
+    });
+  }
 
   // remove duplicates
   return Array.from(new Set(tokens));
