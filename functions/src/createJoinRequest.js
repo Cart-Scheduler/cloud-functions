@@ -20,13 +20,18 @@ const checkMembership = async (personId, projectId) => {
 };
 
 const createJoinRequest = async (projectId, personId, name, email) => {
-  const res = await db.collection('joinRequests').add({
+  const data = {
     projectId,
     personId,
     name,
-    email,
     created: FieldValue.serverTimestamp(),
-  });
+  };
+  if (email) {
+    // Include user's email for better identification.
+    // Name can be easily spoofed.
+    data[email] = email;
+  }
+  const res = await db.collection('joinRequests').add(data);
   return res;
 };
 
@@ -80,7 +85,7 @@ module.exports = async (request) => {
       projectId,
       personId,
       name,
-      request.auth.email,
+      request.auth.token.email,
   );
   logger.info('Join request created for project', projectId, result.id);
   await sendNotifications(projectId, project.name);
