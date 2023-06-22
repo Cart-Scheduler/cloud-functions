@@ -13,6 +13,7 @@ const { onCall } = require('firebase-functions/v2/https');
 
 initializeApp();
 
+const acceptSlotRequests = require('./src/acceptSlotRequests');
 const createPerson = require('./src/createPerson');
 const createProject = require('./src/createProject');
 
@@ -43,6 +44,9 @@ exports.createPerson = functions
     .auth
     .user()
     .onCreate(createPerson);
+
+// Callable function for accepting slot requests
+exports.acceptSlotRequests = onCall(acceptSlotRequests);
 
 // Callable function for creating new projects
 exports.createProject = onCall(createProject);

@@ -65,3 +65,31 @@ const serializableClone = (obj) => {
   return clone;
 };
 exports.serializableClone = serializableClone;
+
+/**
+ * Returns FCM registration tokens that belong to given persons.
+ * @param {array} personIds
+ * @return {array} FCM tokens
+ */
+exports.fetchFcmTokens = async (personIds) => {
+  const userIds = [];
+  const userSS = await db
+      .collection('users')
+      .where('personId', 'in', personIds)
+      .get();
+  userSS.forEach((doc) => {
+    userIds.push(doc.id);
+  });
+
+  const tokens = [];
+  const tokenSS = await db
+      .collection('fcmTokens')
+      .where('uid', 'in', userIds)
+      .get();
+  tokenSS.forEach((doc) => {
+    tokens.push(doc.data().token);
+  });
+
+  // remove duplicates
+  return Array.from(new Set(tokens));
+};
