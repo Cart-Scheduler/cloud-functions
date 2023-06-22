@@ -67,6 +67,20 @@ const serializableClone = (obj) => {
 exports.serializableClone = serializableClone;
 
 /**
+ * Returns person IDs who are admin in given project.
+ * @param {string} projectId
+ * @return {array} Person IDs
+ */
+const getAdmins = async (projectId) => {
+  const doc = await readDoc('projectMembers', projectId);
+  if (doc.members) {
+    return Object.keys(doc.members).filter((id) => doc.members[id].admin);
+  }
+  return [];
+};
+exports.getAdmins = getAdmins;
+
+/**
  * Returns FCM registration tokens that belong to given persons.
  * @param {array} personIds
  * @return {array} FCM tokens

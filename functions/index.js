@@ -14,6 +14,7 @@ const { onCall } = require('firebase-functions/v2/https');
 initializeApp();
 
 const acceptSlotRequests = require('./src/acceptSlotRequests');
+const createJoinRequest = require('./src/createJoinRequest');
 const createPerson = require('./src/createPerson');
 const createProject = require('./src/createProject');
 
@@ -47,6 +48,9 @@ exports.createPerson = functions
 
 // Callable function for accepting slot requests
 exports.acceptSlotRequests = onCall(acceptSlotRequests);
+
+// Callable function for creating a join request
+exports.createJoinRequest = onCall(createJoinRequest);
 
 // Callable function for creating new projects
 exports.createProject = onCall(createProject);

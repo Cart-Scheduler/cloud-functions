@@ -1,12 +1,9 @@
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-const { getMessaging } = require('firebase-admin/messaging');
 const functions = require('firebase-functions');
 const logger = require('firebase-functions/logger');
 
-const { fetchFcmTokens, readDoc } = require('./firestore');
-
-// According to Firebase cloud messaging docs, 500 recipients is limit.
-const MAX_RECIPIENTS = 500;
+const { readDoc } = require('./firestore');
+const { sendSlotRequestAcceptedNotifications } = require('./messaging');
 
 const db = getFirestore();
 
@@ -70,35 +67,8 @@ const acceptSlotRequest = async (slotRequest, slotId, slot) => {
       name: slotRequest.persons[pid].name || '-',
     };
   }
-  logger.debug('acceptSlotRequest', slotRequest, slotId, slot, data);
   await db.collection('slots').doc(slotId).update(data);
   return personIds;
-};
-
-const limitTokens = (tokens) => {
-  if (tokens.length <= MAX_RECIPIENTS) {
-    return tokens;
-  }
-  return tokens.slice(0, MAX_RECIPIENTS);
-};
-
-const sendNotifications = async (personIds) => {
-  logger.debug('sendNotifications', personIds);
-  try {
-    const tokens = await fetchFcmTokens(personIds);
-    logger.debug('recipients', tokens);
-    const message = {
-      notification: {
-        title: 'Sait kärryvuoron!',
-        body: 'Yksi tai useampi anomus on hyväksytty.',
-      },
-      tokens: limitTokens(tokens),
-    };
-    const response = await getMessaging().sendEachForMulticast(message);
-    logger.debug(response.successCount + ' messages were sent');
-  } catch (err) {
-    logger.error(err.message);
-  }
 };
 
 module.exports = async (request) => {
@@ -150,7 +120,7 @@ module.exports = async (request) => {
 
   // remove duplicates
   personIds = Array.from(new Set(personIds));
-  await sendNotifications(personIds);
+  await sendSlotRequestAcceptedNotifications(personIds);
 
   return {
     slotIds: Object.keys(slots),
