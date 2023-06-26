@@ -6,10 +6,12 @@
 // Imports for 1st gen cloud functions
 const { initializeApp } = require('firebase-admin/app');
 const functions = require('firebase-functions');
+const logger = require('firebase-functions/logger');
 
 // Imports for 2nd gen cloud functions
 const { setGlobalOptions } = require('firebase-functions/v2');
 const { onCall } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 
 initializeApp();
 
@@ -17,6 +19,7 @@ const acceptSlotRequests = require('./src/acceptSlotRequests');
 const createJoinRequest = require('./src/createJoinRequest');
 const createPerson = require('./src/createPerson');
 const createProject = require('./src/createProject');
+const sendReminders = require('./src/sendReminders');
 
 /**
  * Returns region where the function is deployed.
@@ -54,3 +57,13 @@ exports.createJoinRequest = onCall(createJoinRequest);
 
 // Callable function for creating new projects
 exports.createProject = onCall(createProject);
+
+// Scheduled function to be run daily.
+exports.dailyTasks = onSchedule('every day 09:00', async (event) => {
+  try {
+    await sendReminders();
+    logger.debug('Daily reminders sent');
+  } catch (err) {
+    logger.error(err.message);
+  }
+});
