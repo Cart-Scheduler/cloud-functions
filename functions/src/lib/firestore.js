@@ -9,6 +9,14 @@ const MAX_IN_COMPARISON_VALUES = 30;
 const db = getFirestore();
 
 /**
+ * Converts given Date object to Firestore Timestamp object.
+ * @param {object} date object
+ * @return {object} Timestamp object
+ */
+exports.dateToTimestamp = (date) =>
+  new Timestamp(date.getTime() / 1000, 0);
+
+/**
  * Reads a Firestore document.
  * @param {string} collection
  * @param {string} id
