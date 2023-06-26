@@ -2,7 +2,7 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const functions = require('firebase-functions');
 const logger = require('firebase-functions/logger');
 
-const { readDoc, docExists } = require('./firestore');
+const { readDoc, docExists } = require('./lib/firestore');
 
 const db = getFirestore();
 

@@ -1,25 +1,12 @@
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const logger = require('firebase-functions/logger');
+const { chopArray } = require('./array');
 
 // Firestore has a limit how many comparison values can be used with 'IN'
 // operation.
 const MAX_IN_COMPARISON_VALUES = 30;
 
 const db = getFirestore();
-
-// Chops given array into chunks where each chunk has maximum
-// chunkLength entries. Returns array of arrays.
-const chopArray = (arr, chunkLength) => {
-  const len = arr.length;
-  if (!len) {
-    return [[]];
-  }
-  const result = [];
-  for (let i = 0; i < len; i += chunkLength) {
-    result.push(arr.slice(i, i + chunkLength));
-  }
-  return result;
-};
 
 /**
  * Reads a Firestore document.

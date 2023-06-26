@@ -2,11 +2,13 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const functions = require('firebase-functions');
 const logger = require('firebase-functions/logger');
 
-const { getAdmins, readDoc } = require('./firestore');
-const { sendJoinRequestCreatedNotifications } = require('./messaging');
+const { getAdmins, readDoc } = require('./lib/firestore');
+const {
+  JOIN_REQ_CREATED_TEMPLATE,
+  sendNotificationsToPersons,
+} = require('./lib/messaging');
 
 const db = getFirestore();
-
 
 // Throws an error if person is already a project member.
 const checkMembership = async (personId, projectId) => {
@@ -37,7 +39,11 @@ const createJoinRequest = async (projectId, personId, name, email) => {
 
 const sendNotifications = async (projectId, name) => {
   const personIds = await getAdmins(projectId);
-  await sendJoinRequestCreatedNotifications(personIds, name);
+  await sendNotificationsToPersons(
+      personIds,
+      JOIN_REQ_CREATED_TEMPLATE,
+      { project: name },
+  );
 };
 
 module.exports = async (request) => {

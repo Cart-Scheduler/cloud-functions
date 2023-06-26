@@ -2,8 +2,11 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const functions = require('firebase-functions');
 const logger = require('firebase-functions/logger');
 
-const { readDoc } = require('./firestore');
-const { sendSlotRequestAcceptedNotifications } = require('./messaging');
+const { readDoc } = require('./lib/firestore');
+const {
+  SLOT_REQ_ACCEPTED_TEMPLATE,
+  sendNotificationsToPersons,
+} = require('./lib/messaging');
 
 const db = getFirestore();
 
@@ -120,7 +123,7 @@ module.exports = async (request) => {
 
   // remove duplicates
   personIds = Array.from(new Set(personIds));
-  await sendSlotRequestAcceptedNotifications(personIds);
+  await sendNotificationsToPersons(personIds, SLOT_REQ_ACCEPTED_TEMPLATE);
 
   return {
     slotIds: Object.keys(slots),
