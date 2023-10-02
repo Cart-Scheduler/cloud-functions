@@ -10,6 +10,7 @@ const logger = require('firebase-functions/logger');
 
 // Imports for 2nd gen cloud functions
 const { setGlobalOptions } = require('firebase-functions/v2');
+const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onCall } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 
@@ -20,6 +21,7 @@ const createJoinRequest = require('./src/createJoinRequest');
 const createPerson = require('./src/createPerson');
 const createProject = require('./src/createProject');
 const sendReminders = require('./src/sendReminders');
+const slotUpdated = require('./src/slotUpdated');
 
 /**
  * Returns region where the function is deployed.
@@ -67,3 +69,5 @@ exports.dailyTasks = onSchedule('every day 09:00', async (event) => {
     logger.error(err.message);
   }
 });
+
+exports.updateSlot = onDocumentUpdated('slots/{slotId}', slotUpdated);
