@@ -31,7 +31,7 @@ const createJoinRequest = async (projectId, personId, name, email) => {
   if (email) {
     // Include user's email for better identification.
     // Name can be easily spoofed.
-    data[email] = email;
+    data.email = email;
   }
   const res = await db.collection('joinRequests').add(data);
   return res;
