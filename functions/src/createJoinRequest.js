@@ -21,7 +21,24 @@ const checkMembership = async (personId, projectId) => {
   }
 };
 
-const createJoinRequest = async (projectId, personId, name, email) => {
+// Returns matching join request doc id or undefined.
+const findJoinRequest = async (projectId, personId) => {
+  const docs = [];
+  const ss = await db
+      .collection('joinRequests')
+      .where('projectId', '==', projectId)
+      .where('personId', '==', personId)
+      .get();
+  ss.forEach((doc) => {
+    docs.push(doc);
+  });
+  // return the first matching document
+  return docs.length > 0 ? docs[0].id : undefined;
+};
+
+
+// Creates or updates existing join request.
+const upsertJoinRequest = async (projectId, personId, name, email) => {
   const data = {
     projectId,
     personId,
@@ -33,7 +50,17 @@ const createJoinRequest = async (projectId, personId, name, email) => {
     // Name can be easily spoofed.
     data.email = email;
   }
-  const res = await db.collection('joinRequests').add(data);
+
+  let res;
+  const docId = await findJoinRequest(projectId, personId);
+  if (docId) {
+    res = await db.collection('joinRequests').doc(docId).set(data);
+    logger.info('Join request updated for project', projectId, res.id);
+  } else {
+    // create new join request document
+    res = await db.collection('joinRequests').add(data);
+    logger.info('Join request created for project', projectId, res.id);
+  }
   return res;
 };
 
@@ -87,13 +114,12 @@ module.exports = async (request) => {
     );
   }
 
-  const result = await createJoinRequest(
+  const result = await upsertJoinRequest(
       projectId,
       personId,
       name,
       request.auth.token.email,
   );
-  logger.info('Join request created for project', projectId, result.id);
   await sendNotifications(projectId, project.name);
   return {
     docId: result.id,
