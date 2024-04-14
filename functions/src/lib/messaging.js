@@ -47,8 +47,10 @@ const sendNotificationsToPersons = async (personIds, template, vars) => {
     const choppedTokens = chopArray(tokens, MAX_RECIPIENTS);
     for (let i = 0; i < choppedTokens.length; i++) {
       message.tokens = choppedTokens[i];
-      const response = await getMessaging().sendEachForMulticast(message);
-      logger.debug(response.successCount + ' notifications were sent');
+      if (message.tokens.length > 0) {
+        const response = await getMessaging().sendEachForMulticast(message);
+        logger.debug(response.successCount + ' notifications were sent');
+      }
     }
   } catch (err) {
     logger.error(err.message);
