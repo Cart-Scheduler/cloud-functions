@@ -20,6 +20,7 @@ const acceptSlotRequests = require('./src/acceptSlotRequests');
 const createJoinRequest = require('./src/createJoinRequest');
 const createPerson = require('./src/createPerson');
 const createProject = require('./src/createProject');
+const personUpdated = require('./src/personUpdated');
 const sendReminders = require('./src/sendReminders');
 const slotUpdated = require('./src/slotUpdated');
 
@@ -70,4 +71,5 @@ exports.dailyTasks = onSchedule('every day 09:00', async (event) => {
   }
 });
 
+exports.updatePerson = onDocumentUpdated('persons/{personId}', personUpdated);
 exports.updateSlot = onDocumentUpdated('slots/{slotId}', slotUpdated);
