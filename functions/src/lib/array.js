@@ -8,7 +8,7 @@
 exports.chopArray = (arr, chunkLength) => {
   const len = arr.length;
   if (!len) {
-    return [[]];
+    return [];
   }
   const result = [];
   for (let i = 0; i < len; i += chunkLength) {
