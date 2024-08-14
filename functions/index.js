@@ -21,6 +21,7 @@ const createJoinRequest = require('./src/createJoinRequest');
 const createPerson = require('./src/createPerson');
 const createProject = require('./src/createProject');
 const personUpdated = require('./src/personUpdated');
+const queryPerson = require('./src/queryPerson');
 const sendReminders = require('./src/sendReminders');
 const slotUpdated = require('./src/slotUpdated');
 
@@ -60,6 +61,9 @@ exports.createJoinRequest = onCall(createJoinRequest);
 
 // Callable function for creating new projects
 exports.createProject = onCall(createProject);
+
+// Callable function for querying person info
+exports.queryPerson = onCall(queryPerson);
 
 // Scheduled function to be run daily.
 exports.dailyTasks = onSchedule('every day 09:00', async (event) => {
