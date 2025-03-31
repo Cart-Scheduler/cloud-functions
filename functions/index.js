@@ -5,7 +5,7 @@
 
 // Imports for 1st gen cloud functions
 const { initializeApp } = require('firebase-admin/app');
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const logger = require('firebase-functions/logger');
 
 // Imports for 2nd gen cloud functions
