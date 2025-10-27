@@ -17,6 +17,7 @@ const { onSchedule } = require('firebase-functions/v2/scheduler');
 initializeApp();
 
 const acceptSlotRequests = require('./src/acceptSlotRequests');
+const { cleanupData } = require('./src/cleanupData');
 const createJoinRequest = require('./src/createJoinRequest');
 const createPerson = require('./src/createPerson');
 const createProject = require('./src/createProject');
@@ -68,6 +69,8 @@ exports.queryPerson = onCall(queryPerson);
 // Scheduled function to be run daily.
 exports.dailyTasks = onSchedule('every day 09:00', async (event) => {
   try {
+    await cleanupData();
+    logger.debug('Daily cleanup finished');
     await sendReminders();
     logger.debug('Daily reminders sent');
   } catch (err) {
